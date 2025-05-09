@@ -2,7 +2,10 @@ import NextLink from "next/link";
 export const ProjectOverview = () => {
   return (
     <div className="flex flex-col items-center justify-end">
-      <h1 className="text-3xl font-semibold mb-4">Scira MCP Chat</h1>
+      <h1 className="text-3xl font-semibold mb-4">Open MCP</h1>
+      <p className="text-sm text-muted-foreground mb-4">
+        A minimalistic MCP client built with Next.js and Shadcn/UI
+      </p>
     </div>
   );
 };

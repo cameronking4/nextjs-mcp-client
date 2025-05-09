@@ -11,10 +11,10 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mcp.scira.ai"),
-  title: "Scira MCP Chat",
-  description: "Scira MCP Chat is a minimalistic MCP client with a good feature set.",
+  title: "Open MCP Chat",
+  description: "Open MCP Chat is a minimalistic MCP client with a good feature set.",
   openGraph: {
-    siteName: "Scira MCP Chat",
+    siteName: "Open MCP Chat",
     url: "https://mcp.scira.ai",
     images: [
       {
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Scira MCP Chat",
-    description: "Scira MCP Chat is a minimalistic MCP client with a good feature set.",
+    title: "Open MCP Chat",
+    description: "Open MCP Chat is a minimalistic MCP client with a good feature set.",
     images: ["https://mcp.scira.ai/twitter-image.png"],
   },
 };

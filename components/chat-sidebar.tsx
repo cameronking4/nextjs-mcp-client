@@ -140,10 +140,11 @@ export function ChatSidebar() {
                 <div className="flex items-center justify-start">
                     <div className={`flex items-center gap-2 ${isCollapsed ? "justify-center w-full" : ""}`}>
                         <div className={`relative rounded-full bg-primary/70 flex items-center justify-center ${isCollapsed ? "size-5 p-3" : "size-6"}`}>
-                            <Image src="/scira.png" alt="Scira Logo" width={24} height={24} className="absolute transform scale-75" unoptimized quality={100} />
+                            <span className="text-lg">⚒️</span>
+                            {/* <Image src="/logo.png" alt="Logo" width={24} height={24} className="absolute transform scale-75" unoptimized quality={100} /> */}
                         </div>
                         {!isCollapsed && (
-                            <div className="font-semibold text-lg text-foreground/90">MCP</div>
+                            <div className="font-semibold text-lg text-foreground/90">Open MCP</div>
                         )}
                     </div>
                 </div>
