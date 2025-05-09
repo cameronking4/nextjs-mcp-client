@@ -1,5 +1,6 @@
 <a href="https://mcp.scira.ai">
-  <h1 align="center">Scira MCP Chat</h1>
+  <h1 align="center">Open MCP</h1>
+  <h3 align="center">Fork of Scira MCP Chat</h1>
 </a>
 
 <p align="center">
