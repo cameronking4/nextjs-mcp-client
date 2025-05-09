@@ -396,20 +396,16 @@ export function ChatSidebar() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onSelect={(e) => {
                                     e.preventDefault();
-                                    window.open("https://git.new/s-mcp", "_blank");
+                                    window.open("https://github.com/cameronking4/open-mcp", "_blank");
                                 }}>
                                     <Github className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
                                     GitHub
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                    <div className="flex items-center justify-between w-full">
-                                        <div className="flex items-center">
-                                            <Sparkles className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
-                                            Theme
-                                        </div>
+                                
+                                    <div className="flex items-center justify-end w-full">
                                         <ThemeToggle className="h-6 w-6" />
                                     </div>
-                                </DropdownMenuItem>
+                               
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
