@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Link from "next/link";
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import { MermaidDiagram } from "./mermaid-diagram";
+
+// Helper function to detect Mermaid syntax
+const isMermaid = (code: string): boolean => {
+  const mermaidRegex = /^(?:graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|journey|gitGraph)/i;
+  return mermaidRegex.test(code.trim());
+};
 
 const components: Partial<Components> = {
   pre: ({ children, ...props }) => (
@@ -11,9 +18,16 @@ const components: Partial<Components> = {
       {children}
     </pre>
   ),
-  code: ({ children, className, ...props }: React.HTMLProps<HTMLElement> & { className?: string }) => {
+  code: ({ className, children, ...props }: React.HTMLProps<HTMLElement> & { className?: string }) => {
     const match = /language-(\w+)/.exec(className || '');
+    const language = match && match[1] ? match[1].toLowerCase() : '';
     const isInline = !match && !className;
+    const codeContent = String(children).replace(/\n$/, '');
+
+    // Check if this is a Mermaid diagram
+    if (language === 'mermaid' || (!isInline && isMermaid(codeContent))) {
+      return <MermaidDiagram chart={codeContent} />;
+    }
 
     if (isInline) {
       return (

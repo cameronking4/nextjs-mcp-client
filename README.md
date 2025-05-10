@@ -23,6 +23,7 @@
 - Reasoning model support.
 - [shadcn/ui](https://ui.shadcn.com/) components for a modern, responsive UI powered by [Tailwind CSS](https://tailwindcss.com).
 - Built with the latest [Next.js](https://nextjs.org) App Router.
+- Support for rendering [Mermaid](https://mermaid.js.org/) diagrams directly in chat messages. See [Mermaid Diagrams documentation](docs/mermaid-diagrams.md) for details.
 
 ## MCP Server Configuration
 

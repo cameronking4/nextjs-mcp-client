@@ -83,7 +83,7 @@ export function CommandPalette({ ...props }: DialogProps) {
         open={open}
         onOpenChange={setOpen}
       >
-        <div className="overflow-hidden rounded-md border border-border shadow-2xl items-center justify-center w-full">
+        <div className="overflow-hidden rounded-md border border-border shadow-2xl items-center justify-center w-full min-w-7xl">
           <div className="overflow-hidden rounded-t-xl">
             <CommandInput placeholder="Type a command or search..." className="border-none focus:ring-0 outline-none" />
           </div>
