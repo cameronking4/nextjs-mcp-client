@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
-import { Share2, Copy, Mail, AlertCircle } from "lucide-react";
+import { Share2, Copy, Mail, AlertCircle, Code } from "lucide-react";
 import { useCopy } from "@/lib/hooks/use-copy";
 import { toast } from "sonner";
 import {
@@ -71,12 +71,57 @@ export default function ChatPage() {
   }, [chatId, userId, queryClient]);
 
   return (
-    <div className="relative h-full w-full">
-      <div className="absolute top-4 right-4 z-50">
+    <div className="relative h-full w-full mr-4">
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+        <ExportButton chatId={chatId} userId={userId} />
         <ShareButton chatId={chatId} userId={userId} />
       </div>
       <Chat />
     </div>
+  );
+}
+
+function ExportButton({ chatId, userId }: { chatId: string, userId: string }) {
+  const { copy } = useCopy();
+  
+  const handleExportWebsiteWidget = () => {
+    // Implementation for exporting to Website Widget
+    // For now, just show a toast notification
+    toast.success("Export to Website Widget feature coming soon");
+  };
+  
+  const handleExportExpoApp = () => {
+    // Implementation for exporting to Expo App
+    // For now, just show a toast notification
+    toast.success("Export to Expo App feature coming soon");
+  };
+  
+  const handleExportV0 = () => {
+    // Implementation for exporting to v0
+    // For now, just show a toast notification
+    toast.success("Export to v0 feature coming soon");
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center justify-center h-8 w-8 bg-muted hover:bg-accent rounded-md transition-colors">
+          <Code className="h-4 w-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+        <DropdownMenuItem onSelect={handleExportWebsiteWidget}>
+          Export to Website Widget
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={handleExportExpoApp}>
+          Export to Expo App
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={handleExportV0}>
+          Export to v0
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
