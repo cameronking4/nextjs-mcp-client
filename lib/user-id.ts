@@ -9,7 +9,7 @@ export function getUserId(): string {
   let userId = localStorage.getItem(USER_ID_KEY);
   
   if (!userId) {
-    // Generate a new user ID and store it
+    // Generate a new Client ID and store it
     userId = nanoid();
     localStorage.setItem(USER_ID_KEY, userId);
   }

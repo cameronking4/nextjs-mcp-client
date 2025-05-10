@@ -10,15 +10,15 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://mcp.scira.ai"),
-  title: "Open MCP Chat",
-  description: "Open MCP Chat is a minimalistic MCP client with a good feature set.",
+  metadataBase: new URL("https://mcpwrapper.app"),
+  title: "Open MCP",
+  description: "Open MCP is a minimalistic MCP client with a good feature set.",
   openGraph: {
-    siteName: "Open MCP Chat",
-    url: "https://mcp.scira.ai",
+    siteName: "Open MCP",
+    url: "https://mcpwrapper.app",
     images: [
       {
-        url: "https://mcp.scira.ai/opengraph-image.png",
+        url: "https://mcpwrapper.app/opengraph-image.png",
         width: 1200,
         height: 630,
       },
@@ -26,9 +26,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Open MCP Chat",
-    description: "Open MCP Chat is a minimalistic MCP client with a good feature set.",
-    images: ["https://mcp.scira.ai/twitter-image.png"],
+    title: "Open MCP",
+    description: "Open MCP is a minimalistic MCP client with a good feature set.",
+    images: ["https://mcpwrapper.app/twitter-image.png"],
   },
 };
 
@@ -57,7 +57,7 @@ export default function RootLayout({
             </main>
           </div>
         </Providers>
-        <Script defer src="https://cloud.umami.is/script.js" data-website-id="1373896a-fb20-4c9d-b718-c723a2471ae5" />
+        <Script defer src="https://cloud.umami.is/script.js" data-website-id="1430f6d2-7d6d-4f87-8be1-6cda482c47fd" />
       </body>
     </html>
   );

@@ -96,23 +96,23 @@ export function ChatSidebar() {
     // Get active MCP servers status
     const activeServersCount = selectedMcpServers.length;
 
-    // Handle user ID update
+    // Handle Client ID update
     const handleUpdateUserId = () => {
         if (!newUserId.trim()) {
-            toast.error("User ID cannot be empty");
+            toast.error("Client ID cannot be empty");
             return;
         }
 
         updateUserId(newUserId.trim());
         setUserId(newUserId.trim());
         setEditUserIdOpen(false);
-        toast.success("User ID updated successfully");
+        toast.success("Client ID updated successfully");
         
-        // Refresh the page to reload chats with new user ID
+        // Refresh the page to reload chats with new Client ID
         window.location.reload();
     };
 
-    // Show loading state if user ID is not yet initialized
+    // Show loading state if Client ID is not yet initialized
     if (!userId) {
         return null; // Or a loading spinner
     }
@@ -332,7 +332,7 @@ export function ChatSidebar() {
                                             </AvatarFallback>
                                         </Avatar>
                                         <div className="grid text-left text-sm leading-tight">
-                                            <span className="truncate font-medium text-foreground/90">User ID</span>
+                                            <span className="truncate font-medium text-foreground/90">Client ID</span>
                                             <span className="truncate text-xs text-muted-foreground">{userId.substring(0, 16)}...</span>
                                         </div>
                                     </div>
@@ -354,7 +354,7 @@ export function ChatSidebar() {
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="grid flex-1 text-left text-sm leading-tight">
-                                        <span className="truncate font-semibold text-foreground/90">User ID</span>
+                                        <span className="truncate font-semibold text-foreground/90">Client ID</span>
                                         <span className="truncate text-xs text-muted-foreground">{userId}</span>
                                     </div>
                                 </div>
@@ -364,17 +364,17 @@ export function ChatSidebar() {
                                 <DropdownMenuItem onSelect={(e) => {
                                     e.preventDefault();
                                     navigator.clipboard.writeText(userId);
-                                    toast.success("User ID copied to clipboard");
+                                    toast.success("Client ID copied to clipboard");
                                 }}>
                                     <Copy className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
-                                    Copy User ID
+                                    Copy Client ID
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onSelect={(e) => {
                                     e.preventDefault();
                                     setEditUserIdOpen(true);
                                 }}>
                                     <Pencil className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
-                                    Edit User ID
+                                    Edit Client ID
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
@@ -433,19 +433,19 @@ export function ChatSidebar() {
             }}>
                 <DialogContent className="sm:max-w-[400px]">
                     <DialogHeader>
-                        <DialogTitle>Edit User ID</DialogTitle>
+                        <DialogTitle>Edit Client ID</DialogTitle>
                         <DialogDescription>
-                            Update your user ID for chat synchronization. This will affect which chats are visible to you.
+                            Update your Client ID for chat synchronization. This will affect which chats are visible to you.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="userId">User ID</Label>
+                            <Label htmlFor="userId">Client ID</Label>
                             <Input
                                 id="userId"
                                 value={newUserId}
                                 onChange={(e) => setNewUserId(e.target.value)}
-                                placeholder="Enter your user ID"
+                                placeholder="Enter your Client ID"
                             />
                         </div>
                     </div>

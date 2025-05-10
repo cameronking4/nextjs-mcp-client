@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
   if (!userId) {
     return new Response(
-      JSON.stringify({ error: "User ID is required" }),
+      JSON.stringify({ error: "Client ID is required" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }

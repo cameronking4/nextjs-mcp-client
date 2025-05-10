@@ -55,7 +55,8 @@ const xaiClient = createXai({
 
 const languageModels = {
   "gpt-4.1": openaiClient("gpt-4.1"),
-  "gpt-o4-mini": openaiClient("gpt-o4-mini"),
+  "gpt-4o-mini": openaiClient("gpt-4o-mini"),
+  "o3-mini": openaiClient("gpt-o3-mini"),
   "claude-3-7-sonnet": anthropicClient('claude-3-7-sonnet-20250219'),
   // "qwen-qwq": wrapLanguageModel(
   //   {
@@ -69,17 +70,17 @@ const languageModels = {
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
   "gpt-4.1": {
     provider: "OpenAI",
-    name: "GPT-4.1",
+    name: "GPT 4.1",
     description: "Latest version of OpenAI's GPT-4.1 with strong reasoning and coding capabilities.",
     apiVersion: "gpt-4.1",
-    capabilities: ["Fast"]
+    capabilities: ["Efficient", "Agentic"]
   },
-  "gpt-o4-mini": {
+  "gpt-4o-mini": {
     provider: "OpenAI",
-    name: "GPT-o4 Mini",
+    name: "GPT 4o-mini",
     description: "Latest reasoning model from OpenAI thinking models.",
-    apiVersion: "gpt-o4-mini",
-    capabilities: ["Reasoning", "Efficient", "Agentic"]
+    apiVersion: "gpt-4o-mini",
+    capabilities: ["Non-Reasoning", "Fast",]
   },
   "claude-3-7-sonnet": {
     provider: "Anthropic",
@@ -96,6 +97,13 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
   //   apiVersion: "qwen-qwq",
   //   capabilities: ["Reasoning", "Efficient", "Agentic"]
   // },
+  "o3-mini": {
+    provider: "OpenAI",
+    name: "O3 Mini",
+    description: "Latest version of OpenAI's O3 Mini with strong reasoning and coding capabilities.",
+    apiVersion: "o3-mini",
+    capabilities: ["Fast", "Efficient", "Reasoning"]
+  },
   "grok-3-mini": {
     provider: "XAI",
     name: "Grok 3 Mini",

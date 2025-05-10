@@ -453,7 +453,7 @@ export const MCPServerManager = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[480px] max-h-[85vh] overflow-hidden flex flex-col">
+            <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <ServerIcon className="h-5 w-5 text-primary" />
@@ -480,7 +480,7 @@ export const MCPServerManager = ({
                                             Select multiple servers to combine their tools
                                         </span>
                                     </div>
-                                    <div className="overflow-y-auto pr-1 flex-1 gap-2.5 flex flex-col pb-16">
+                                    <div className="overflow-y-auto pr-1 flex-1 gap-2.5 grid grid-cols-1 lg:grid-cols-2 pb-16">
                                         {servers
                                             .sort((a, b) => {
                                                 const aActive = selectedServers.includes(a.id);
