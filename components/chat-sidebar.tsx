@@ -139,9 +139,8 @@ export function ChatSidebar() {
             <SidebarHeader className="p-4 border-b border-border/40">
                 <div className="flex items-center justify-start">
                     <div className={`flex items-center gap-2 ${isCollapsed ? "justify-center w-full" : ""}`}>
-                        <div className={`relative rounded-full bg-primary/70 flex items-center justify-center ${isCollapsed ? "size-5 p-3" : "size-6"}`}>
-                            <span className="text-lg">⚒️</span>
-                            {/* <Image src="/logo.png" alt="Logo" width={24} height={24} className="absolute transform scale-75" unoptimized quality={100} /> */}
+                        <div className={`relative rounded-full flex items-center justify-center ${isCollapsed ? "size-5 p-3" : "size-6"}`}>
+                            <Image src="/logo.png" alt="Logo" width={24} height={24} className="absolute transform scale-75" unoptimized quality={100} />
                         </div>
                         {!isCollapsed && (
                             <div className="font-semibold text-lg text-foreground/90">Open MCP</div>
@@ -152,8 +151,25 @@ export function ChatSidebar() {
             
             <SidebarContent className="flex flex-col h-[calc(100vh-8rem)]">
                 <SidebarGroup className="flex-1 min-h-0">
+                    <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        <Button
+                            variant="default"
+                            className={cn(
+                                "w-full bg-primary text-primary-foreground hover:bg-primary/90",
+                                isCollapsed ? "w-8 h-8 p-0" : ""
+                            )}
+                            onClick={handleNewChat}
+                            title={isCollapsed ? "New Chat" : undefined}
+                        >
+                            <PlusCircle className={`${isCollapsed ? "" : "mr-2"} h-4 w-4`} />
+                            {!isCollapsed && <span>New Chat</span>}
+                        </Button>
+                    </motion.div>
                     <SidebarGroupLabel className={cn(
-                        "px-4 text-xs font-medium text-muted-foreground/80 uppercase tracking-wider",
+                        "mt-4 border-border/40 px-4 text-xs font-medium text-muted-foreground/80 uppercase tracking-wider",
                         isCollapsed ? "sr-only" : ""
                     )}>
                         Chats
@@ -290,24 +306,7 @@ export function ChatSidebar() {
             
             <SidebarFooter className="p-4 border-t border-border/40 mt-auto">
                 <div className={`flex flex-col ${isCollapsed ? "items-center" : ""} gap-3`}>
-                    <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <Button
-                            variant="default"
-                            className={cn(
-                                "w-full bg-primary text-primary-foreground hover:bg-primary/90",
-                                isCollapsed ? "w-8 h-8 p-0" : ""
-                            )}
-                            onClick={handleNewChat}
-                            title={isCollapsed ? "New Chat" : undefined}
-                        >
-                            <PlusCircle className={`${isCollapsed ? "" : "mr-2"} h-4 w-4`} />
-                            {!isCollapsed && <span>New Chat</span>}
-                        </Button>
-                    </motion.div>
-                    
+                                        
                     <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
                             {isCollapsed ? (
