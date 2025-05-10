@@ -16,7 +16,7 @@ import { convertToUIMessages } from "@/lib/chat-store";
 import { type Message as DBMessage } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
 import { useMCP } from "@/lib/context/mcp-context";
-
+import { CommandPalette } from "./command-palette";
 // Type for chat data from DB
 interface ChatData {
   id: string;
@@ -152,6 +152,9 @@ export default function Chat() {
       {messages.length === 0 && !isLoadingChat ? (
         <div className="max-w-xl mx-auto w-full">
           <ProjectOverview />
+          <div className="mt-1 w-full mx-auto">
+            <CommandPalette />
+          </div>
           <form
             onSubmit={handleFormSubmit}
             className="mt-4 w-full mx-auto"

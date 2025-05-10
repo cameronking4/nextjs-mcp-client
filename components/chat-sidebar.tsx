@@ -391,7 +391,7 @@ export function ChatSidebar() {
                                     setApiKeySettingsOpen(true);
                                 }}>
                                     <Key className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
-                                    API Keys
+                                    LLM API Keys
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onSelect={(e) => {
                                     e.preventDefault();
