@@ -54,24 +54,32 @@ const xaiClient = createXai({
 });
 
 const languageModels = {
-  "gpt-4.1-mini": openaiClient("gpt-4.1-mini"),
+  "gpt-4.1": openaiClient("gpt-4.1"),
+  "gpt-o4-mini": openaiClient("gpt-o4-mini"),
   "claude-3-7-sonnet": anthropicClient('claude-3-7-sonnet-20250219'),
-  "qwen-qwq": wrapLanguageModel(
-    {
-      model: groqClient("qwen-qwq-32b"),
-      middleware
-    }
-  ),
+  // "qwen-qwq": wrapLanguageModel(
+  //   {
+  //     model: groqClient("qwen-qwq-32b"),
+  //     middleware
+  //   }
+  // ),
   "grok-3-mini": xaiClient("grok-3-mini-latest"),
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
-  "gpt-4.1-mini": {
+  "gpt-4.1": {
     provider: "OpenAI",
-    name: "GPT-4.1 Mini",
-    description: "Compact version of OpenAI's GPT-4.1 with good balance of capabilities, including vision.",
-    apiVersion: "gpt-4.1-mini",
-    capabilities: ["Balance", "Creative", "Vision"]
+    name: "GPT-4.1",
+    description: "Latest version of OpenAI's GPT-4.1 with strong reasoning and coding capabilities.",
+    apiVersion: "gpt-4.1",
+    capabilities: ["Fast"]
+  },
+  "gpt-o4-mini": {
+    provider: "OpenAI",
+    name: "GPT-o4 Mini",
+    description: "Latest reasoning model from OpenAI thinking models.",
+    apiVersion: "gpt-o4-mini",
+    capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
   "claude-3-7-sonnet": {
     provider: "Anthropic",
@@ -80,19 +88,20 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     apiVersion: "claude-3-7-sonnet-20250219",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
-  "qwen-qwq": {
-    provider: "Groq",
-    name: "Qwen QWQ",
-    description: "Latest version of Alibaba's Qwen QWQ with strong reasoning and coding capabilities.",
-    apiVersion: "qwen-qwq",
-    capabilities: ["Reasoning", "Efficient", "Agentic"]
-  },
+  
+  // "qwen-qwq": {
+  //   provider: "Groq",
+  //   name: "Qwen QWQ",
+  //   description: "Latest version of Alibaba's Qwen QWQ with strong reasoning and coding capabilities.",
+  //   apiVersion: "qwen-qwq",
+  //   capabilities: ["Reasoning", "Efficient", "Agentic"]
+  // },
   "grok-3-mini": {
     provider: "XAI",
     name: "Grok 3 Mini",
     description: "Latest version of XAI's Grok 3 Mini with strong reasoning and coding capabilities.",
     apiVersion: "grok-3-mini-latest",
-    capabilities: ["Reasoning", "Efficient", "Agentic"]
+    capabilities: ["Fast", "Efficient", "Reasoning"]
   },
 };
 
@@ -114,4 +123,4 @@ export type modelID = keyof typeof languageModels;
 
 export const MODELS = Object.keys(languageModels);
 
-export const defaultModel: modelID = "qwen-qwq";
+export const defaultModel: modelID = "claude-3-7-sonnet";
