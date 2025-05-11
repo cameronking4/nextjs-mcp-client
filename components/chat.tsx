@@ -16,7 +16,9 @@ import { convertToUIMessages } from "@/lib/chat-store";
 import { type Message as DBMessage } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
 import { useMCP } from "@/lib/context/mcp-context";
+import { getSystemPrompt } from "@/lib/system-prompt";
 import { CommandPalette } from "./command-palette";
+
 // Type for chat data from DB
 interface ChatData {
   id: string;
@@ -39,13 +41,28 @@ export default function Chat({ isWidget = false }: ChatProps) {
   const [userId, setUserId] = useState<string>('');
   const [generatedChatId, setGeneratedChatId] = useState<string>('');
   const [files, setFiles] = useState<FileList | null>(null);
+  const [systemPrompt, setSystemPrompt] = useState<string>('');
   
   // Get MCP server data from context
   const { mcpServersForApi } = useMCP();
   
-  // Initialize userId
+  // Initialize userId and system prompt
   useEffect(() => {
     setUserId(getUserId());
+    // Get system prompt from local storage
+    setSystemPrompt(getSystemPrompt());
+    
+    // Add event listener to detect changes to system prompt
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEYS.SYSTEM_PROMPT) {
+        setSystemPrompt(getSystemPrompt());
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
   
   // Generate a chat ID if needed
@@ -113,6 +130,7 @@ export default function Chat({ isWidget = false }: ChatProps) {
         mcpServers: mcpServersForApi,
         chatId: chatId || generatedChatId, // Use generated ID if no chatId in URL
         userId,
+        systemPrompt, // Include the system prompt in the request
       },
       experimental_throttle: 500,
       onFinish: () => {
@@ -160,12 +178,14 @@ export default function Chat({ isWidget = false }: ChatProps) {
 
   return (
     <div className={`h-dvh flex flex-col justify-center w-full ${isWidget ? '' : 'max-w-3xl mx-auto px-4 sm:px-6 md:py-4'}`}>
+      {!isWidget && messages.length != 0 && !isLoadingChat && (
+        <div className="mt-1 w-full mx-auto">
+            <CommandPalette />
+        </div>
+      )}
       {messages.length === 0 && !isLoadingChat ? (
         <div className="max-w-xl mx-auto w-full">
           <ProjectOverview />
-          <div className="mt-1 w-full mx-auto">
-            <CommandPalette />
-          </div>
           <form
             onSubmit={handleFormSubmit}
             className="mt-4 w-full mx-auto"

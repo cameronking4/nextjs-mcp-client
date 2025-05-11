@@ -8,6 +8,7 @@ import { chats } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { initializeMCPClients, type MCPServerConfig } from '@/lib/mcp-client';
 import { generateTitle } from '@/app/actions';
+import { DEFAULT_SYSTEM_PROMPT } from '@/lib/system-prompt';
 
 export const runtime = 'nodejs';
 
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
     userId,
     mcpServers = [],
     experimental_attachments = [],
+    systemPrompt,
   }: {
     messages: UIMessage[];
     chatId?: string;
@@ -31,6 +33,7 @@ export async function POST(req: Request) {
     userId: string;
     mcpServers?: MCPServerConfig[];
     experimental_attachments?: any[];
+    systemPrompt?: string;
   } = await req.json();
 
   if (!userId) {
@@ -126,36 +129,12 @@ export async function POST(req: Request) {
   // Track if the response has completed
   let responseCompleted = false;
 
+  // Use system prompt from request if provided, otherwise use default
+  const finalSystemPrompt = systemPrompt || DEFAULT_SYSTEM_PROMPT;
+
   const result = streamText({
     model: model.languageModel(selectedModel),
-    system: `You are a helpful assistant with access to a variety of tools.
-
-    Today's date is ${new Date().toISOString().split('T')[0]}.
-
-    The tools are very powerful, and you can use them to answer the user's question.
-    So choose the tool that is most relevant to the user's question.
-
-    If tools are not available, say you don't know or if the user wants a tool they can add one from the server icon in bottom left corner in the sidebar.
-
-    You can use multiple tools in a single response.
-    Always respond after using the tools for better user experience.
-    You can run multiple steps using all the tools!!!!
-    Make sure to use the right tool to respond to the user's question.
-
-    Multiple tools can be used in a single response and multiple steps can be used to answer the user's question.
-
-    ## Response Format
-    - Markdown is supported.
-    - Respond according to tool's response.
-    - Use the tools to answer the user's question.
-    - If you don't know the answer, use the tools to find the answer or say you don't know.
-    
-    ## Attachments
-    - The user may provide attachments (images, documents, etc.) with their messages.
-    - If attachments are provided, analyze them and incorporate your understanding in your response.
-    - For images, describe what you see and use that information to better answer the user's question.
-    - For text documents, summarize the content and use it to provide a more informed response.
-    `,
+    system: finalSystemPrompt,
     messages,
     tools,
     maxSteps: 20,

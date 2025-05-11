@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Sparkles, ChevronsUpDown, Copy, Pencil, Github, Key } from "lucide-react";
+import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Sparkles, ChevronsUpDown, Copy, Pencil, Github, Key, Expand, Ellipsis, Search } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { MCPServerManager } from "./mcp-server-manager";
 import { ApiKeyManager } from "./api-key-manager";
+import { SystemPromptManager } from "./system-prompt-manager";
 import { ThemeToggle } from "./theme-toggle";
 import { getUserId, updateUserId } from "@/lib/user-id";
 import { useChats } from "@/lib/hooks/use-chats";
@@ -52,6 +53,39 @@ import { Label } from "@/components/ui/label";
 import { useMCP } from "@/lib/context/mcp-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnimatePresence, motion } from "motion/react";
+import { ChatCommandDialog } from "./chat-command-dialog";
+
+// Keyboard shortcut component that adapts to the platform
+const KbdShortcut = ({ 
+  shortcut, 
+  className 
+}: { 
+  shortcut: { mac: string; win: string; }; 
+  className?: string; 
+}) => {
+  const [isMac, setIsMac] = useState(false);
+  
+  useEffect(() => {
+    // Detect if user is on Mac
+    setIsMac(typeof navigator !== 'undefined' ? navigator.platform.toUpperCase().indexOf('MAC') >= 0 : false);
+  }, []);
+  
+  // Parse the shortcut string into components
+  const keys = isMac ? shortcut.mac.split('+') : shortcut.win.split('+');
+  
+  return (
+    <kbd className={cn(
+      "pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100",
+      className
+    )}>
+      {keys.map((key, i) => (
+        <span key={i} className="text-xs">
+          {i > 0 && "+"}{key}
+        </span>
+      ))}
+    </kbd>
+  );
+};
 
 export function ChatSidebar() {
     const router = useRouter();
@@ -59,10 +93,12 @@ export function ChatSidebar() {
     const [userId, setUserId] = useState<string>('');
     const [mcpSettingsOpen, setMcpSettingsOpen] = useState(false);
     const [apiKeySettingsOpen, setApiKeySettingsOpen] = useState(false);
+    const [systemPromptOpen, setSystemPromptOpen] = useState(false);
     const { state } = useSidebar();
     const isCollapsed = state === "collapsed";
     const [editUserIdOpen, setEditUserIdOpen] = useState(false);
     const [newUserId, setNewUserId] = useState('');
+    const [commandDialogOpen, setCommandDialogOpen] = useState(false);
 
     // Get MCP server data from context
     const { mcpServers, setMcpServers, selectedMcpServers, setSelectedMcpServers } = useMCP();
@@ -74,6 +110,14 @@ export function ChatSidebar() {
     
     // Use TanStack Query to fetch chats
     const { chats, isLoading, deleteChat, refreshChats } = useChats(userId);
+
+    // Platform detection for shortcuts
+    const [isMac, setIsMac] = useState(false);
+    
+    useEffect(() => {
+        // Detect if user is on Mac
+        setIsMac(typeof navigator !== 'undefined' ? navigator.platform.toUpperCase().indexOf('MAC') >= 0 : false);
+    }, []);
 
     // Start a new chat
     const handleNewChat = () => {
@@ -135,7 +179,7 @@ export function ChatSidebar() {
     };
 
     return (
-        <Sidebar className="shadow-sm bg-background/80 dark:bg-background/40 backdrop-blur-md" collapsible="icon">
+        <Sidebar className="shadow-sm bg-background/80 dark:bg-background/40 backdrop-blur-md scrollbar-hide" collapsible="icon">
             <SidebarHeader className="p-4 border-b border-border/40">
                 <div className="flex items-center justify-start">
                     <div className={`flex items-center gap-2 ${isCollapsed ? "justify-center w-full" : ""}`}>
@@ -143,31 +187,47 @@ export function ChatSidebar() {
                             <Image src="/logo.png" alt="Logo" width={24} height={24} className="absolute transform scale-75" unoptimized quality={100} />
                         </div>
                         {!isCollapsed && (
-                            <div className="font-semibold text-lg text-foreground/90">Open MCP</div>
+                            <div className="font-semibold text-lg text-foreground/90">MCP Workbench</div>
                         )}
                     </div>
                 </div>
             </SidebarHeader>
             
-            <SidebarContent className="flex flex-col h-[calc(100vh-8rem)]">
+            <SidebarContent className="flex flex-col">
                 <SidebarGroup className="flex-1 min-h-0">
-                    <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <Button
-                            variant="default"
-                            className={cn(
-                                "w-full bg-primary text-primary-foreground hover:bg-primary/90",
-                                isCollapsed ? "w-8 h-8 p-0" : ""
-                            )}
-                            onClick={handleNewChat}
-                            title={isCollapsed ? "New Chat" : undefined}
+                    <div className={`flex gap-2 ${isCollapsed ? "flex-col" : ""}`}>
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="flex-1"
                         >
-                            <PlusCircle className={`${isCollapsed ? "" : "mr-2"} h-4 w-4`} />
-                            {!isCollapsed && <span>New Chat</span>}
-                        </Button>
-                    </motion.div>
+                            <Button
+                                variant="default"
+                                className={cn(
+                                    "w-full bg-primary text-primary-foreground hover:bg-primary/90",
+                                    isCollapsed ? "w-8 h-8 p-0" : ""
+                                )}
+                                onClick={handleNewChat}
+                                title={isCollapsed ? "New Chat" : undefined}
+                            >
+                                <PlusCircle className={`${isCollapsed ? "" : "mr-2"} h-4 w-4`} />
+                                {!isCollapsed && <span>New Chat</span>}
+                            </Button>
+                        </motion.div>
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <Button
+                                variant="outline"
+                                className="w-9 h-9 p-0 flex items-center justify-center"
+                                onClick={() => setCommandDialogOpen(true)}
+                                title={`Search Chats (${isMac ? '⌘/' : 'Ctrl+/'})`}
+                            >
+                                <Search className="h-4 w-4" />
+                            </Button>
+                        </motion.div>
+                    </div>
                     <SidebarGroupLabel className={cn(
                         "mt-4 border-border/40 px-4 text-xs font-medium text-muted-foreground/80 uppercase tracking-wider",
                         isCollapsed ? "sr-only" : ""
@@ -175,10 +235,10 @@ export function ChatSidebar() {
                         Chats
                     </SidebarGroupLabel>
                     <SidebarGroupContent className={cn(
-                        "overflow-y-auto pt-1",
-                        isCollapsed ? "overflow-x-hidden" : ""
+                        "pt-1",
+                        isCollapsed ? "overflow-x-hidden scrollbar-hide scrollbar-none overflow-y-hidden" : "overflow-y-auto"
                     )}>
-                        <SidebarMenu>
+                        <SidebarMenu className="scrollbar-hide">
                             {isLoading ? (
                                 renderChatSkeletons()
                             ) : chats.length === 0 ? (
@@ -253,7 +313,6 @@ export function ChatSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
-                
                 <div className="relative my-0">
                     <div className="absolute inset-x-0">
                         <Separator className="w-full h-px bg-border/40" />
@@ -297,6 +356,34 @@ export function ChatSidebar() {
                                             {activeServersCount}
                                         </SidebarMenuBadge>
                                     ) : null}
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                <SidebarGroup className="flex-shrink-0">
+                    <SidebarGroupLabel className={cn(
+                        "px-4 pt-0 text-xs font-medium text-muted-foreground/80 uppercase tracking-wider",
+                        isCollapsed ? "sr-only" : ""
+                    )}>
+                        System Prompt
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton 
+                                    onClick={() => setSystemPromptOpen(true)}
+                                    className={cn(
+                                        "w-full flex items-center gap-2 transition-all",
+                                        "hover:bg-secondary/50 active:bg-secondary/70"
+                                    )}
+                                    tooltip={isCollapsed ? "System Prompt" : undefined}
+                                >
+                                    <Sparkles className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                                    {!isCollapsed && (
+                                        <span className="flex-grow text-sm text-foreground/80">Edit System Prompt</span>
+                                    )}
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -363,12 +450,25 @@ export function ChatSidebar() {
                             <DropdownMenuGroup>
                                 <DropdownMenuItem onSelect={(e) => {
                                     e.preventDefault();
+                                    setCommandDialogOpen(true);
+                                }}>
+                                    <Search className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
+                                    Search Chats
+                                    <div className="ml-auto flex items-center text-xs text-muted-foreground">
+                                        <KbdShortcut shortcut={{ mac: "⌘/", win: "Ctrl+/" }} />
+                                    </div>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => {
+                                    e.preventDefault();
                                     navigator.clipboard.writeText(userId);
                                     toast.success("Client ID copied to clipboard");
                                 }}>
                                     <Copy className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
                                     Copy Client ID
                                 </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
                                 <DropdownMenuItem onSelect={(e) => {
                                     e.preventDefault();
                                     setEditUserIdOpen(true);
@@ -392,6 +492,13 @@ export function ChatSidebar() {
                                 }}>
                                     <Key className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
                                     LLM API Keys
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => {
+                                    e.preventDefault();
+                                    setSystemPromptOpen(true);
+                                }}>
+                                    <Sparkles className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
+                                    System Prompt
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onSelect={(e) => {
                                     e.preventDefault();
@@ -422,6 +529,11 @@ export function ChatSidebar() {
                 <ApiKeyManager
                     open={apiKeySettingsOpen}
                     onOpenChange={setApiKeySettingsOpen}
+                />
+
+                <SystemPromptManager
+                    open={systemPromptOpen}
+                    onOpenChange={setSystemPromptOpen}
                 />
             </SidebarFooter>
 
@@ -462,6 +574,12 @@ export function ChatSidebar() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Command Dialog for searching chats */}
+            <ChatCommandDialog 
+                open={commandDialogOpen}
+                onOpenChange={setCommandDialogOpen}
+            />
         </Sidebar>
     );
 } 

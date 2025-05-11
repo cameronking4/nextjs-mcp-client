@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { STORAGE_KEYS } from "@/lib/constants";
 import { MCPProvider } from "@/lib/context/mcp-context";
+import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -38,6 +39,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <SidebarProvider defaultOpen={sidebarOpen} open={sidebarOpen} onOpenChange={setSidebarOpen}>
             {children}
             <Toaster position="top-center" richColors />
+            <KeyboardShortcuts />
           </SidebarProvider>
         </MCPProvider>
       </ThemeProvider>

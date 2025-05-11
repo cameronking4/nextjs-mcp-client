@@ -7,9 +7,9 @@ export const ProjectOverview = () => {
       <div className={`relative rounded-full flex items-center justify-center size-14`}>
           <Image src="/logo.png" alt="Logo" width={100} height={100} className="absolute transform scale-75" unoptimized quality={100} />
       </div>
-      <h1 className="text-3xl font-semibold mb-4">Open MCP</h1>
+      <h1 className="text-3xl font-semibold mb-4">MCP Workbench</h1>
       <p className="text-sm text-muted-foreground mb-4">
-        A minimalistic MCP client built with Next.js and Shadcn/UI
+        An Open MCP client built with Next.js and Shadcn/UI
       </p>
     </div>
   );

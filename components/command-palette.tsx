@@ -73,11 +73,10 @@ export function CommandPalette({ ...props }: DialogProps) {
         onClick={() => setOpen(true)}
         {...props}
       >
-        <kbd className="pointer-events-none hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:ml-auto sm:flex">
+        <span className="inline-flex">Launch Command Palette</span>
+        <kbd className="pointer-events-none hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 py-1 font-mono text-[10px] font-medium opacity-100 sm:ml-auto sm:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
-        <span className="inline-flex">Launch Command Palette</span>
-        
       </Button>
       <CommandDialog
         open={open}
