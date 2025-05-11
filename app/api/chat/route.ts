@@ -91,9 +91,15 @@ export async function POST(req: Request) {
   }
 
   // Initialize MCP clients using the already running persistent SSE servers
-  // mcpServers now only contains SSE configurations since stdio servers
-  // have been converted to SSE in the MCP context
-  const { tools, cleanup } = await initializeMCPClients(mcpServers, req.signal);
+  // Process MCP servers and capture tools for each server
+  const { tools, cleanup, serverTools } = await initializeMCPClients(mcpServers, req.signal);
+  
+  // For server logging - just log the tools found for each server
+  if (serverTools) {
+    for (const [serverUrl, toolsList] of Object.entries(serverTools)) {
+      console.log(`Found tools for server ${serverUrl}:`, toolsList);
+    }
+  }
 
   console.log("messages", messages);
   console.log("parts", messages.map(m => m.parts.map(p => p)));

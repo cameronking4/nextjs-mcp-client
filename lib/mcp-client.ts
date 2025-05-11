@@ -8,7 +8,7 @@ export interface KeyValuePair {
 
 export interface MCPServerConfig {
   url: string;
-  type: 'sse' | 'stdio';
+  type: 'sse' | 'http';
   command?: string;
   args?: string[];
   env?: KeyValuePair[];
@@ -18,6 +18,7 @@ export interface MCPServerConfig {
 export interface MCPClientManager {
   tools: Record<string, any>;
   clients: any[];
+  serverTools: Record<string, string[]>;
   cleanup: () => Promise<void>;
 }
 
@@ -41,7 +42,7 @@ async function waitForServerReady(url: string, maxAttempts = 5) {
 
 /**
  * Initialize MCP clients for API calls
- * This uses the already running persistent SSE servers
+ * This handles both SSE and HTTP transport types
  */
 export async function initializeMCPClients(
   mcpServers: MCPServerConfig[] = [],
@@ -50,26 +51,36 @@ export async function initializeMCPClients(
   // Initialize tools
   let tools = {};
   const mcpClients: any[] = [];
+  const serverTools: Record<string, string[]> = {};
 
   // Process each MCP server configuration
   for (const mcpServer of mcpServers) {
     try {
-      // All servers are handled as SSE
+      const headers = mcpServer.headers?.reduce((acc, header) => {
+        if (header.key) acc[header.key] = header.value || '';
+        return acc;
+      }, {} as Record<string, string>);
+
+      // Create transport config based on server type
+      // For now, treat 'http' type as 'sse' for compatibility with AI SDK
+      // In the future, this can be updated when the SDK supports HTTP streamable
       const transport = {
-        type: 'sse' as const,
+        type: 'sse' as const, // Always use 'sse' as the transport type for AI SDK
         url: mcpServer.url,
-        headers: mcpServer.headers?.reduce((acc, header) => {
-          if (header.key) acc[header.key] = header.value || '';
-          return acc;
-        }, {} as Record<string, string>)
+        headers
       };
 
       const mcpClient = await createMCPClient({ transport });
       mcpClients.push(mcpClient);
 
       const mcptools = await mcpClient.tools();
-
-      console.log(`MCP tools from ${mcpServer.url}:`, Object.keys(mcptools));
+      
+      // Store tools on the server object to display in UI
+      const foundToolNames = Object.keys(mcptools);
+      console.log(`MCP tools from ${mcpServer.url}:`, foundToolNames);
+      
+      // Save the tools for this server
+      serverTools[mcpServer.url] = foundToolNames;
 
       // Add MCP tools to tools object
       tools = { ...tools, ...mcptools };
@@ -89,6 +100,7 @@ export async function initializeMCPClients(
   return {
     tools,
     clients: mcpClients,
+    serverTools,
     cleanup: async () => await cleanupMCPClients(mcpClients)
   };
 }

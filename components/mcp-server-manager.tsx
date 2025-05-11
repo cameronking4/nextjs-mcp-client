@@ -42,8 +42,8 @@ import { KeyValuePair, MCPServer, ServerStatus, useMCP } from "@/lib/context/mcp
 const INITIAL_NEW_SERVER: Omit<MCPServer, 'id'> = {
     name: '',
     url: '',
-    type: 'sse',
-    command: 'node',
+    type: 'http',
+    command: '',
     args: [],
     env: [],
     headers: []
@@ -79,42 +79,33 @@ const maskValue = (value: string): string => {
     return value.substring(0, 3) + '•'.repeat(Math.min(10, value.length - 4)) + value.substring(value.length - 1);
 };
 
-const StatusIndicator = ({ status, onClick }: { status?: ServerStatus, onClick?: () => void }) => {
-    const isClickable = !!onClick;
-    
-    const className = `flex-shrink-0 flex items-center gap-1 ${isClickable ? 'cursor-pointer hover:underline' : ''}`;
-    
-    switch (status) {
-        case 'connected':
-            return (
-                <div className={className} onClick={onClick}>
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-xs text-green-500">Connected</span>
-                </div>
-            );
-        case 'connecting':
-            return (
-                <div className={className} onClick={onClick}>
-                    <RefreshCw className="w-3 h-3 text-amber-500 animate-spin" />
-                    <span className="text-xs text-amber-500">Connecting</span>
-                </div>
-            );
-        case 'error':
-            return (
-                <div className={className} onClick={onClick}>
-                    <AlertTriangle className="w-3 h-3 text-red-500" />
-                    <span className="text-xs text-red-500">Error</span>
-                </div>
-            );
-        case 'disconnected':
-        default:
-            return (
-                <div className={className} onClick={onClick}>
-                    <div className="w-2 h-2 rounded-full bg-gray-400" />
-                    <span className="text-xs text-muted-foreground">Disconnected</span>
-                </div>
-            );
+const ToolsList = ({ tools }: { tools?: string[] }) => {
+    if (!tools || tools.length === 0) {
+        return (
+            <div className="text-xs text-muted-foreground">
+                No tools available
+            </div>
+        );
     }
+    
+    return (
+        <div className="flex flex-wrap gap-1 mt-1">
+            {tools.slice(0, 3).map((tool, index) => (
+                <span 
+                    key={index} 
+                    className="px-1.5 py-0.5 bg-secondary text-secondary-foreground rounded text-[0.6rem] max-w-[100px] truncate"
+                    title={tool}
+                >
+                    {tool}
+                </span>
+            ))}
+            {tools.length > 3 && (
+                <span className="px-1.5 py-0.5 bg-secondary text-muted-foreground rounded text-[0.6rem]">
+                    +{tools.length - 3} more
+                </span>
+            )}
+        </div>
+    );
 };
 
 export const MCPServerManager = ({
@@ -158,13 +149,8 @@ export const MCPServerManager = ({
             return;
         }
 
-        if (newServer.type === 'sse' && !newServer.url) {
-            toast.error("Server URL is required for SSE transport");
-            return;
-        }
-
-        if (newServer.type === 'stdio' && (!newServer.command || !newServer.args?.length)) {
-            toast.error("Command and at least one argument are required for stdio transport");
+        if ((newServer.type === 'sse' || newServer.type === 'http') && !newServer.url) {
+            toast.error("Server URL is required");
             return;
         }
 
@@ -380,12 +366,8 @@ export const MCPServerManager = ({
             toast.error("Server name is required");
             return;
         }
-        if (newServer.type === 'sse' && !newServer.url) {
-            toast.error("Server URL is required for SSE transport");
-            return;
-        }
-        if (newServer.type === 'stdio' && (!newServer.command || !newServer.args?.length)) {
-            toast.error("Command and at least one argument are required for stdio transport");
+        if ((newServer.type === 'sse' || newServer.type === 'http') && !newServer.url) {
+            toast.error("Server URL is required");
             return;
         }
         const updated = servers.map(s =>
@@ -491,7 +473,6 @@ export const MCPServerManager = ({
                                             })
                                             .map((server) => {
                                             const isActive = selectedServers.includes(server.id);
-                                            const isRunning = server.status === 'connected' || server.status === 'connecting';
 
                                             return (
                                                 <div
@@ -509,7 +490,7 @@ export const MCPServerManager = ({
                                                             {server.type === 'sse' ? (
                                                                 <Globe className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'} flex-shrink-0`} />
                                                             ) : (
-                                                                <Terminal className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'} flex-shrink-0`} />
+                                                                <Globe className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'} flex-shrink-0`} />
                                                             )}
                                                             <h4 className="text-sm font-medium truncate max-w-[160px]">{server.name}</h4>
                                                             {hasAdvancedConfig(server) && (
@@ -523,33 +504,8 @@ export const MCPServerManager = ({
                                                                 {server.type.toUpperCase()}
                                                             </span>
                                                             
-                                                            {/* Status indicator */}
-                                                            <StatusIndicator 
-                                                                status={server.status} 
-                                                                onClick={() => server.errorMessage && toast.error(server.errorMessage)}
-                                                            />
-                                                            
                                                             {/* Server actions */}
                                                             <div className="flex items-center">
-                                                                <button
-                                                                    onClick={(e) => toggleServerStatus(server, e)}
-                                                                    className="p-1 rounded-full hover:bg-muted/70"
-                                                                    aria-label={isRunning ? "Stop server" : "Start server"}
-                                                                    title={isRunning ? "Stop server" : "Start server"}
-                                                                >
-                                                                    <Power className={`h-3.5 w-3.5 ${isRunning ? 'text-red-500' : 'text-green-500'}`} />
-                                                                </button>
-                                                                
-                                                                <button
-                                                                    onClick={(e) => restartServer(server, e)}
-                                                                    className="p-1 rounded-full hover:bg-muted/70"
-                                                                    aria-label="Restart server"
-                                                                    title="Restart server"
-                                                                    disabled={server.status === 'connecting'}
-                                                                >
-                                                                    <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${server.status === 'connecting' ? 'opacity-50' : ''}`} />
-                                                                </button>
-                                                                
                                                                 <button
                                                                     onClick={(e) => removeServer(server.id, e)}
                                                                     className="p-1 rounded-full hover:bg-muted/70"
@@ -573,16 +529,16 @@ export const MCPServerManager = ({
 
                                                     {/* Server Details */}
                                                     <p className="text-xs text-muted-foreground mb-2.5 truncate">
-                                                        {server.type === 'sse'
-                                                            ? server.url
-                                                            : `${server.command} ${server.args?.join(' ')}`
-                                                        }
+                                                        {server.url}
                                                     </p>
+                                                    
+                                                    {/* Tools List */}
+                                                    <ToolsList tools={server.tools} />
 
                                                     {/* Action Button */}
                                                     <Button
                                                         size="sm"
-                                                        className="w-full gap-1.5 hover:text-black hover:dark:text-white rounded-lg"
+                                                        className="w-full gap-1.5 hover:text-black hover:dark:text-white rounded-lg mt-2"
                                                         variant={isActive ? "default" : "outline"}
                                                         onClick={() => toggleServer(server.id)}
                                                     >
@@ -662,24 +618,24 @@ export const MCPServerManager = ({
                                         
                                         <button
                                             type="button"
-                                            onClick={() => setNewServer({ ...newServer, type: 'stdio' })}
+                                            onClick={() => setNewServer({ ...newServer, type: 'http' })}
                                             className={`flex items-center gap-2 p-3 rounded-md text-left border transition-all ${
-                                                newServer.type === 'stdio' 
+                                                newServer.type === 'http' 
                                                     ? 'border-primary bg-primary/10 ring-1 ring-primary' 
                                                     : 'border-border hover:border-border/80 hover:bg-muted/50'
                                             }`}
                                         >
-                                            <Terminal className={`h-5 w-5 shrink-0 ${newServer.type === 'stdio' ? 'text-primary' : ''}`} />
+                                            <Globe className={`h-5 w-5 shrink-0 ${newServer.type === 'http' ? 'text-primary' : ''}`} />
                                             <div>
-                                                <p className="font-medium">stdio</p>
-                                                <p className="text-xs text-muted-foreground">Standard I/O</p>
+                                                <p className="font-medium">HTTP</p>
+                                                <p className="text-xs text-muted-foreground">HTTP Streamable</p>
                                             </div>
                                         </button>
                                     </div>
                                 </div>
                             </div>
 
-                            {newServer.type === 'sse' ? (
+                            {newServer.type === 'sse' || newServer.type === 'http' ? (
                                 <div className="grid gap-1.5">
                                     <Label htmlFor="url">
                                         Server URL
@@ -692,43 +648,10 @@ export const MCPServerManager = ({
                                         className="relative z-0"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Full URL to the SSE endpoint of the MCP server
+                                        Full URL to the MCP server endpoint
                                     </p>
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="grid gap-1.5">
-                                        <Label htmlFor="command">
-                                            Command
-                                        </Label>
-                                        <Input
-                                            id="command"
-                                            value={newServer.command}
-                                            onChange={(e) => setNewServer({ ...newServer, command: e.target.value })}
-                                            placeholder="node"
-                                            className="relative z-0"
-                                        />
-                                        <p className="text-xs text-muted-foreground">
-                                            Executable to run (e.g., node, python)
-                                        </p>
-                                    </div>
-                                    <div className="grid gap-1.5">
-                                        <Label htmlFor="args">
-                                            Arguments
-                                        </Label>
-                                        <Input
-                                            id="args"
-                                            value={newServer.args?.join(' ') || ''}
-                                            onChange={(e) => handleArgsChange(e.target.value)}
-                                            placeholder="src/mcp-server.js --port 3001"
-                                            className="relative z-0"
-                                        />
-                                        <p className="text-xs text-muted-foreground">
-                                            Space-separated arguments or JSON array
-                                        </p>
-                                    </div>
-                                </>
-                            )}
+                            ) : null}
 
                             {/* Advanced Configuration */}
                             <Accordion type="single" collapsible className="w-full">
@@ -1016,7 +939,7 @@ export const MCPServerManager = ({
                                 disabled={
                                     !newServer.name ||
                                     (newServer.type === 'sse' && !newServer.url) ||
-                                    (newServer.type === 'stdio' && (!newServer.command || !newServer.args?.length))
+                                    (newServer.type === 'http' && !newServer.url)
                                 }
                             >
                                 {editingServerId ? "Save Changes" : "Add Server"}

@@ -17,7 +17,7 @@ export interface MCPServer {
   id: string;
   name: string;
   url: string;
-  type: 'sse' | 'stdio';
+  type: 'sse' | 'http';
   command?: string;
   args?: string[];
   env?: KeyValuePair[];
@@ -25,11 +25,12 @@ export interface MCPServer {
   description?: string;
   status?: ServerStatus;
   errorMessage?: string;
+  tools?: string[];
 }
 
 // Type for processed MCP server config for API
 export interface MCPServerApi {
-  type: 'sse';
+  type: 'sse' | 'http';
   url: string;
   headers?: KeyValuePair[];
 }
@@ -48,6 +49,7 @@ interface MCPContextType {
   startServer: (serverId: string) => Promise<boolean>;
   stopServer: (serverId: string) => Promise<void>;
   updateServerStatus: (serverId: string, status: ServerStatus, errorMessage?: string) => void;
+  updateServerTools: (serverId: string, tools: string[]) => void;
 }
 
 const MCPContext = createContext<MCPContextType | undefined>(undefined);
@@ -97,13 +99,13 @@ export function MCPProvider(props: { children: React.ReactNode }) {
     );
   };
   
-  // Start a server (if it's stdio type) using server actions
+  // Start a server (if it's http type) using server actions
   const startServer = async (serverId: string): Promise<boolean> => {
     const server = mcpServers.find(s => s.id === serverId);
     if (!server) return false;
     
-    // If it's already an SSE server, just update the status
-    if (server.type === 'sse') {
+    // If it's an SSE or HTTP server, just update the status
+    if (server.type === 'sse' || server.type === 'http') {
       updateServerStatus(serverId, 'connecting');
       
       try {
@@ -113,72 +115,6 @@ export function MCPProvider(props: { children: React.ReactNode }) {
         return isReady;
       } catch (error) {
         updateServerStatus(serverId, 'error', `Connection error: ${error instanceof Error ? error.message : String(error)}`);
-        return false;
-      }
-    }
-    
-    // For stdio type, start a sandbox via the server action
-    if (server.type === 'stdio' && server.command && server.args?.length) {
-      updateServerStatus(serverId, 'connecting');
-      
-      try {
-        // Check if we already have a sandbox for this server
-        const existingSandbox = sandboxesRef.current.find(s => s.id === serverId);
-        if (existingSandbox) {
-          try {
-            // Test if the existing sandbox is still responsive
-            const isReady = await waitForServerReady(existingSandbox.url);
-            if (isReady) {
-              updateServerStatus(serverId, 'connected');
-              return true;
-            }
-            // If not responsive, we'll create a new one below
-          } catch {
-            // Sandbox wasn't responsive, continue to create a new one
-          }
-        }
-        
-        // Call the server action to create a sandbox
-        const { url } = await startSandbox({
-          id: serverId,
-          command: server.command,
-          args: server.args,
-          env: server.env,
-        });
-        
-        // Wait for the server to become ready
-        const isReady = await waitForServerReady(url);
-        if (!isReady) {
-          updateServerStatus(serverId, 'error', 'Server failed to start in time');
-          
-          // Attempt to stop the sandbox since it's not working correctly
-          try {
-            await stopSandbox(serverId);
-          } catch (stopError) {
-            console.error('Failed to stop non-responsive sandbox:', stopError);
-          }
-          
-          return false;
-        }
-        
-        // Store the sandbox reference
-        // Remove any existing sandbox for this server first
-        sandboxesRef.current = sandboxesRef.current.filter(s => s.id !== serverId);
-        sandboxesRef.current.push({ id: serverId, url });
-        
-        // Update the server URL to point to the sandbox SSE URL
-        setMcpServers(current => 
-          current.map(s => 
-            s.id === serverId 
-              ? { ...s, status: 'connected', errorMessage: undefined, url } 
-              : s
-          )
-        );
-        
-        return true;
-      } catch (error) {
-        console.error('Error starting server:', error);
-        updateServerStatus(serverId, 'error', `Startup error: ${error instanceof Error ? error.message : String(error)}`);
         return false;
       }
     }
@@ -245,14 +181,25 @@ export function MCPProvider(props: { children: React.ReactNode }) {
       .map(id => mcpServers.find(server => server.id === id))
       .filter((server): server is MCPServer => Boolean(server))
       .map(server => ({
-        // All servers are exposed as SSE type to the API
-        type: 'sse',
+        // Pass the server type directly to the API
+        type: server.type as 'sse' | 'http',
         url: server.url,
         headers: server.headers
       }));
     
     setMcpServersForApi(processedServers);
   }, [mcpServers, selectedMcpServers]);
+
+  // Add the updateServerTools method
+  const updateServerTools = (serverId: string, tools: string[]) => {
+    setMcpServers(current => 
+      current.map(server => 
+        server.id === serverId 
+          ? { ...server, tools } 
+          : server
+      )
+    );
+  };
 
   return (
     <MCPContext.Provider 
@@ -264,7 +211,8 @@ export function MCPProvider(props: { children: React.ReactNode }) {
         mcpServersForApi,
         startServer,
         stopServer,
-        updateServerStatus
+        updateServerStatus,
+        updateServerTools
       }}
     >
       {children}

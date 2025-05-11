@@ -40,24 +40,15 @@ This application supports connecting to Model Context Protocol (MCP) servers to 
 1. Click the settings icon (⚙️) next to the model selector in the chat interface.
 2. Enter a name for your MCP server.
 3. Select the transport type:
-   - **SSE (Server-Sent Events)**: For HTTP-based remote servers
-   - **stdio (Standard I/O)**: For local servers running on the same machine
+   - **SSE (Server-Sent Events)**: For HTTP-based remote servers using Server-Sent Events
+   - **HTTP Streamable**: For HTTP-based remote servers using streamable HTTP
 
-#### SSE Configuration
+#### Server Configuration
 
-If you select SSE transport:
-1. Enter the server URL (e.g., `https://mcp.example.com/token/sse`)
-2. Click "Add Server"
-
-#### stdio Configuration
-
-If you select stdio transport:
-1. Enter the command to execute (e.g., `npx`)
-2. Enter the command arguments (e.g., `-y @modelcontextprotocol/server-google-maps`)
-   - You can enter space-separated arguments or paste a JSON array
+1. Enter the server URL (e.g., `https://mcp.example.com/endpoint`)
+2. Add any required HTTP headers (optional)
 3. Click "Add Server"
-
-4. Click "Use" to activate the server for the current chat session.
+4. Click "Enable Server" to activate the server for the current chat session.
 
 ### Available MCP Servers
 
@@ -65,7 +56,7 @@ You can use any MCP-compatible server with this application. Here are some examp
 
 - [Composio](https://composio.dev/mcp) - Provides search, code interpreter, and other tools
 - [Zapier MCP](https://zapier.com/mcp) - Provides access to Zapier tools
-- Any MCP server using stdio transport with npx and python3
+- Any MCP-compatible server supporting SSE or HTTP Streamable transport
 
 ## License
 
