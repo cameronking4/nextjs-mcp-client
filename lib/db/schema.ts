@@ -1,4 +1,4 @@
-import { timestamp, pgTable, text, primaryKey, json } from "drizzle-orm/pg-core";
+import { timestamp, pgTable, text, primaryKey, json, boolean } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 
 // Message role enum type
@@ -48,4 +48,19 @@ export type DBMessage = {
   role: string;
   parts: MessagePart[];
   createdAt: Date;
-}; 
+};
+
+export const widgets = pgTable('widgets', {
+  id: text('id').primaryKey().notNull().$defaultFn(() => nanoid()),
+  userId: text('user_id').notNull(),
+  name: text('name').notNull().default('My Chat Widget'),
+  modelId: text('model_id').notNull(),
+  mcpServers: json('mcp_servers').notNull(), // Store selected MCP server configurations
+  customization: json('customization').default({}), // For future customization options
+  isPublic: boolean('is_public').default(true).notNull(),
+  allowedDomains: json('allowed_domains').default([]), // Domains where widget can be embedded
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export type Widget = typeof widgets.$inferSelect;

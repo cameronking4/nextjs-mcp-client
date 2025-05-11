@@ -1,10 +1,10 @@
 <a href="https://mcp.scira.ai">
-  <h1 align="center">Open MCP</h1>
-  <h3 align="center">Fork of Scira MCP Chat</h1>
+  <h1 align="center">Open MCP Workbench</h1>
+  <h3 align="center">Inspired by Scira MCP Chat</h1>
 </a>
 
 <p align="center">
-  An open-source AI chatbot app powered by Model Context Protocol (MCP), built with Next.js and the AI SDK by Vercel.
+  A Workbench to test, host, export and embed Model Context Protocol (MCP) web clients, built with Next.js and the AI SDK by Vercel.
 </p>
 
 <p align="center">
@@ -18,12 +18,18 @@
 
 - Streaming text responses powered by the [AI SDK by Vercel](https://sdk.vercel.ai/docs), allowing multiple AI providers to be used interchangeably with just a few lines of code.
 - Full integration with [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers to expand available tools and capabilities.
-- Multiple MCP transport types (SSE and stdio) for connecting to various tool providers.
+- Supports MCP transport types (SSE and HTTP Streamable) for connecting to various tool providers.
 - Built-in tool integration for extending AI capabilities.
 - Reasoning model support.
 - [shadcn/ui](https://ui.shadcn.com/) components for a modern, responsive UI powered by [Tailwind CSS](https://tailwindcss.com).
 - Built with the latest [Next.js](https://nextjs.org) App Router.
 - Support for rendering [Mermaid](https://mermaid.js.org/) diagrams directly in chat messages. See [Mermaid Diagrams documentation](docs/mermaid-diagrams.md) for details.
+- Chat & configure agents by combining tools and models:
+  - Export as Website Widget for your website. (remote configuration)
+  - Export as Expo App for your mobile devices. (remote configuration)
+  - Export to v0 to extend as an Agent application. (remote configuration)
+  - Export as Full Screen Chat link (remote configuration)
+  - Export as HTTP Endpoint. (remote configuration)
 
 ## MCP Server Configuration
 

@@ -25,7 +25,11 @@ interface ChatData {
   updatedAt: string;
 }
 
-export default function Chat() {
+interface ChatProps {
+  isWidget?: boolean;
+}
+
+export default function Chat({ isWidget = false }: ChatProps) {
   const router = useRouter();
   const params = useParams();
   const chatId = params?.id as string | undefined;
@@ -155,7 +159,7 @@ export default function Chat() {
   const isLoading = status === "streaming" || status === "submitted" || isLoadingChat;
 
   return (
-    <div className="h-dvh flex flex-col justify-center w-full max-w-3xl mx-auto px-4 sm:px-6 md:py-4">
+    <div className={`h-dvh flex flex-col justify-center w-full ${isWidget ? '' : 'max-w-3xl mx-auto px-4 sm:px-6 md:py-4'}`}>
       {messages.length === 0 && !isLoadingChat ? (
         <div className="max-w-xl mx-auto w-full">
           <ProjectOverview />
@@ -168,7 +172,7 @@ export default function Chat() {
           >
             <Textarea
               selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
+              setSelectedModel={isWidget ? undefined : setSelectedModel}
               handleInputChange={handleInputChange}
               input={input}
               isLoading={isLoading}
@@ -176,6 +180,7 @@ export default function Chat() {
               stop={stop}
               files={files}
               setFiles={setFiles}
+              isWidget={isWidget}
             />
           </form>
         </div>
@@ -190,7 +195,7 @@ export default function Chat() {
           >
             <Textarea
               selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
+              setSelectedModel={isWidget ? undefined : setSelectedModel}
               handleInputChange={handleInputChange}
               input={input}
               isLoading={isLoading}
@@ -198,6 +203,7 @@ export default function Chat() {
               stop={stop}
               files={files}
               setFiles={setFiles}
+              isWidget={isWidget}
             />
           </form>
         </>

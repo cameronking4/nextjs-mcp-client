@@ -14,9 +14,10 @@ interface InputProps {
   status: string;
   stop: () => void;
   selectedModel: modelID;
-  setSelectedModel: (model: modelID) => void;
+  setSelectedModel?: (model: modelID) => void;
   files?: FileList | null;
   setFiles?: (files: FileList | null) => void;
+  isWidget?: boolean;
 }
 
 // Helper function to get text preview from text files
@@ -50,6 +51,7 @@ export const Textarea = ({
   setSelectedModel,
   files,
   setFiles,
+  isWidget,
 }: InputProps) => {
   const isStreaming = status === "streaming" || status === "submitted";
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -260,10 +262,12 @@ export const Textarea = ({
         onPaste={handlePaste}
       />
       
-      <ModelPicker
-        setSelectedModel={setSelectedModel}
-        selectedModel={selectedModel}
-      />
+      {setSelectedModel && !isWidget && (
+        <ModelPicker
+          setSelectedModel={setSelectedModel}
+          selectedModel={selectedModel}
+        />
+      )}
 
       <div className="absolute right-2 bottom-2 flex items-center gap-2">
         {/* File upload button */}

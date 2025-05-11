@@ -14,6 +14,7 @@ import {
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import { Share2, Copy, Mail, AlertCircle, Code, Download, Bot, Globe, Phone, Tablet, Laptop } from "lucide-react";
+import { WidgetExportDialog } from "@/components/widget-export-dialog";
 import { useCopy } from "@/lib/hooks/use-copy";
 import { toast } from "sonner";
 import {
@@ -92,10 +93,11 @@ function ExportButton({ chatId, userId }: { chatId: string, userId: string }) {
   const [exportStatus, setExportStatus] = useState<'idle' | 'exporting' | 'success' | 'error'>('idle');
   const [exportData, setExportData] = useState<any>(null);
   
+  const [widgetExportDialogOpen, setWidgetExportDialogOpen] = useState(false);
+  
   const handleExportWebsiteWidget = () => {
-    // Implementation for exporting to Website Widget
-    // For now, just show a toast notification
-    toast.success("Export to Website Widget feature coming soon");
+    // Open the widget export dialog
+    setWidgetExportDialogOpen(true);
   };
   
   const handleExportExpoApp = () => {
@@ -199,7 +201,7 @@ function ExportButton({ chatId, userId }: { chatId: string, userId: string }) {
             <Laptop className="h-4 w-4" /> Export to v0
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={handleExportWebsiteWidget}>
-            <Bot className="h-4 w-4" /> Export to Chat Widget
+            <Bot className="h-4 w-4" /> Export as Website Widget
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={handleExportExpoApp}>
             <Tablet className="h-4 w-4" /> Export to Expo App
@@ -302,6 +304,13 @@ function ExportButton({ chatId, userId }: { chatId: string, userId: string }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Widget Export Dialog */}
+      <WidgetExportDialog
+        open={widgetExportDialogOpen}
+        onOpenChange={setWidgetExportDialogOpen}
+        selectedModel={selectedModel}
+      />
     </>
   );
 }
@@ -399,4 +408,4 @@ function ShareButton({ chatId, userId }: { chatId: string, userId: string }) {
       </Dialog>
     </>
   );
-} 
+}
