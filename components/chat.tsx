@@ -34,6 +34,7 @@ export default function Chat() {
   const [selectedModel, setSelectedModel] = useLocalStorage<modelID>("selectedModel", defaultModel);
   const [userId, setUserId] = useState<string>('');
   const [generatedChatId, setGeneratedChatId] = useState<string>('');
+  const [files, setFiles] = useState<FileList | null>(null);
   
   // Get MCP server data from context
   const { mcpServersForApi } = useMCP();
@@ -130,20 +131,26 @@ export default function Chat() {
   const handleFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (!chatId && generatedChatId && input.trim()) {
+    // Create options object with attachments if available
+    const options = files ? { experimental_attachments: files } : {};
+    
+    if (!chatId && generatedChatId && (input.trim() || (files && files.length > 0))) {
       // If this is a new conversation, redirect to the chat page with the generated ID
       const effectiveChatId = generatedChatId;
       
-      // Submit the form
-      handleSubmit(e);
+      // Submit the form with attachments
+      handleSubmit(e, options);
       
       // Redirect to the chat page with the generated ID
       router.push(`/chat/${effectiveChatId}`);
     } else {
-      // Normal submission for existing chats
-      handleSubmit(e);
+      // Normal submission for existing chats with attachments
+      handleSubmit(e, options);
     }
-  }, [chatId, generatedChatId, input, handleSubmit, router]);
+    
+    // Clear files after submission
+    setFiles(null);
+  }, [chatId, generatedChatId, input, handleSubmit, router, files]);
 
   const isLoading = status === "streaming" || status === "submitted" || isLoadingChat;
 
@@ -167,6 +174,8 @@ export default function Chat() {
               isLoading={isLoading}
               status={status}
               stop={stop}
+              files={files}
+              setFiles={setFiles}
             />
           </form>
         </div>
@@ -187,6 +196,8 @@ export default function Chat() {
               isLoading={isLoading}
               status={status}
               stop={stop}
+              files={files}
+              setFiles={setFiles}
             />
           </form>
         </>

@@ -6,7 +6,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import equal from "fast-deep-equal";
 import { Markdown } from "./markdown";
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, ChevronUpIcon, LightbulbIcon, BrainIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, LightbulbIcon, BrainIcon, FileIcon } from "lucide-react";
 import { SpinnerIcon } from "./icons";
 import { ToolInvocation } from "./tool-invocation";
 import { CopyButton } from "./copy-button";
@@ -21,6 +21,17 @@ interface ReasoningMessagePartProps {
   part: ReasoningPart;
   isReasoning: boolean;
 }
+
+// Helper function to get text from data URL
+const getTextFromDataUrl = (dataUrl: string) => {
+  try {
+    const base64 = dataUrl.split(",")[1];
+    return window.atob(base64);
+  } catch (error) {
+    console.error("Error decoding base64:", error);
+    return "Unable to decode text content";
+  }
+};
 
 export function ReasoningMessagePart({
   part,
@@ -124,6 +135,48 @@ export function ReasoningMessagePart({
   );
 }
 
+// Component to render an attachment
+function AttachmentPreview({ 
+  contentType, 
+  url, 
+  name 
+}: { 
+  contentType?: string; 
+  url: string; 
+  name?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      {contentType?.startsWith("image/") ? (
+        <div className="relative">
+          <img
+            src={url}
+            alt={name || "Attached image"}
+            className="max-w-[240px] max-h-[240px] rounded-md border border-border/50 object-contain"
+          />
+          <div className="text-xs text-muted-foreground mt-1 truncate max-w-[240px]">
+            {name}
+          </div>
+        </div>
+      ) : contentType?.startsWith("text/") ? (
+        <div className="flex flex-col gap-1">
+          <div className="text-xs max-w-[240px] max-h-[160px] overflow-hidden text-muted-foreground border p-2 rounded-md bg-muted/10">
+            {getTextFromDataUrl(url)}
+          </div>
+          <div className="text-xs text-muted-foreground truncate max-w-[240px]">
+            {name}
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground border p-2 rounded-md bg-muted/10">
+          <FileIcon className="h-4 w-4" />
+          <span className="truncate max-w-[200px]">{name}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const PurePreviewMessage = ({
   message,
   isLatestMessage,
@@ -218,6 +271,27 @@ const PurePreviewMessage = ({
                   return null;
               }
             })}
+            
+            {/* Display attachments from experimental_attachments if present */}
+            {message.experimental_attachments && message.experimental_attachments.length > 0 && (
+              <div className="flex flex-row flex-wrap gap-3 mt-2">
+                {message.experimental_attachments.map((attachment, index) => (
+                  <motion.div
+                    initial={{ y: 5, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    key={`message-${message.id}-exp-attachment-${index}`}
+                    className="flex flex-col gap-1"
+                  >
+                    <AttachmentPreview
+                      contentType={attachment.contentType}
+                      url={attachment.url}
+                      name={attachment.name}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+            
             {shouldShowCopyButton && (
               <div className="flex justify-start mt-2">
                 <CopyButton text={getMessageText()} />
@@ -235,5 +309,6 @@ export const Message = memo(PurePreviewMessage, (prevProps, nextProps) => {
   if (prevProps.message.annotations !== nextProps.message.annotations)
     return false;
   if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
+  if (!equal(prevProps.message.experimental_attachments, nextProps.message.experimental_attachments)) return false;
   return true;
 });

@@ -23,12 +23,14 @@ export async function POST(req: Request) {
     selectedModel,
     userId,
     mcpServers = [],
+    experimental_attachments = [],
   }: {
     messages: UIMessage[];
     chatId?: string;
     selectedModel: modelID;
     userId: string;
     mcpServers?: MCPServerConfig[];
+    experimental_attachments?: any[];
   } = await req.json();
 
   if (!userId) {
@@ -95,6 +97,25 @@ export async function POST(req: Request) {
 
   console.log("messages", messages);
   console.log("parts", messages.map(m => m.parts.map(p => p)));
+  
+  // Log attachments if present
+  if (experimental_attachments && experimental_attachments.length > 0) {
+    console.log("attachments", experimental_attachments.map(a => ({ name: a.name, type: a.contentType })));
+  }
+
+  // If there are attachments, add them to the last user message
+  if (experimental_attachments && experimental_attachments.length > 0) {
+    // Find the last user message
+    const lastUserMessageIndex = [...messages].reverse().findIndex(m => m.role === 'user');
+    if (lastUserMessageIndex >= 0) {
+      const actualIndex = messages.length - 1 - lastUserMessageIndex;
+      // Add attachments to the message
+      messages[actualIndex] = {
+        ...messages[actualIndex],
+        experimental_attachments
+      };
+    }
+  }
 
   // Track if the response has completed
   let responseCompleted = false;
@@ -122,6 +143,12 @@ export async function POST(req: Request) {
     - Respond according to tool's response.
     - Use the tools to answer the user's question.
     - If you don't know the answer, use the tools to find the answer or say you don't know.
+    
+    ## Attachments
+    - The user may provide attachments (images, documents, etc.) with their messages.
+    - If attachments are provided, analyze them and incorporate your understanding in your response.
+    - For images, describe what you see and use that information to better answer the user's question.
+    - For text documents, summarize the content and use it to provide a more informed response.
     `,
     messages,
     tools,
