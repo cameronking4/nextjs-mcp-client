@@ -1,5 +1,5 @@
 <a href="https://mcp.scira.ai">
-  <h1 align="center">Open MCP Workbench</h1>
+  <h1 align="center">Open MCP Wrapper</h1>
   <h3 align="center">Inspired by Scira MCP Chat</h1>
 </a>
 
